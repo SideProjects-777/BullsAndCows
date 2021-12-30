@@ -8,7 +8,7 @@ import schedule
 import time
 
 
-bot = Bot(token="2018151846:AAE0HhWs3OCntHLHTX4rhhf_aQkfACqe4fU", parse_mode=types.ParseMode.HTML)
+bot = Bot(token="", parse_mode=types.ParseMode.HTML)
 
 dp = Dispatcher(bot)
 
