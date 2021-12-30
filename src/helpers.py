@@ -1,4 +1,3 @@
-
 import random
 
 def generateGame(n):
@@ -31,26 +30,3 @@ def genCows(quess, value):
                 if strValue[loop2] == strQuess[loop1]:
                     cows = cows + 1
     return cows
-
-
-if __name__=='__main__':  
-    print("Game has started")
-    siz = int(input("Generate the length of the random number = "))
-    hiddenValue = generateGame(siz)
-    print("Number has been generated = ")
-    print(hiddenValue)
-    finished = False
-    round = 1
-    while finished==False:
-        print("Round= ", round,"and your quess = ")
-        quess = int(input())
-        if quess == hiddenValue:
-            print("Congratulations you got the value")
-            finished = True
-        else:
-            oxen = genOxen(quess, hiddenValue)
-            cows = genCows(quess, hiddenValue)
-            print("We have ", oxen," oxen and ",cows," cows")
-        round = round + 1
-        
-
