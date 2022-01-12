@@ -44,22 +44,22 @@ export default class Intro extends Component {
         {
           title:'Main',
           data:[
-            {key:1, name:'Not Completed', icon:"play", type:"ionicon", page:"Not Finished"},
-            {key:2, name:'Statistics', icon:"stats-chart", type:"ionicon", page:"Stats"},
+            {key:1, name:'Not Completed', icon:"play", type:"ionicon", page:"Continue", gameMode:false},
+            {key:2, name:'Statistics', icon:"stats-chart", type:"ionicon", page:"Statistics", gameMode:false},
           ]
         },
         {
           title:"New Game - Easy", 
           data:[
-            {key:1, name:'4-Digits', icon:"bed", type:"ionicon", size: 4, complex: false},
-            {key:2, name:'5-Digits', icon:"boat", type:"ionicon", size: 5, complex: false},
+            {key:1, name:'4-Digits', icon:"bed", type:"ionicon", size: 4, complex: false, gameMode:true},
+            {key:2, name:'5-Digits', icon:"boat", type:"ionicon", size: 5, complex: false, gameMode:true},
           ]
         },
         {
           title:"New Game - Hard", 
           data:[
-            {key:1, name:'4-Digits', icon:"star-half", type:"ionicon",  size: 4, complex: true},
-            {key:2, name:'5-Digits', icon:"star", type:"ionicon", size: 5, complex: true},
+            {key:1, name:'4-Digits', icon:"star-half", type:"ionicon",  size: 4, complex: true, gameMode:true},
+            {key:2, name:'5-Digits', icon:"star", type:"ionicon", size: 5, complex: true, gameMode:true},
           ]
         },
       ]
@@ -84,7 +84,8 @@ export default class Intro extends Component {
           renderItem={({item}) => {
             return (
             <View style={styles.container}>
-              <TouchableOpacity onPress={() => {this.generateNumber(item.complex,item.size)}} style= {styles.touchable}>
+            {item.gameMode &&
+            <TouchableOpacity onPress={() => {this.generateNumber(item.complex,item.size)}} style= {styles.touchable}>
                 <Icon reverse name={item.icon} type={item.type}/>              
                 <View style={styles.content}>
                   <View style={styles.contentHeader}>
@@ -92,6 +93,17 @@ export default class Intro extends Component {
                   </View>
                 </View>
               </TouchableOpacity>
+            }
+            {!item.gameMode &&
+              <TouchableOpacity onPress={() => {this.props.navigation.navigate(item.page)}} style= {styles.touchable}>
+              <Icon reverse name={item.icon} type={item.type}/>              
+              <View style={styles.content}>
+                <View style={styles.contentHeader}>
+                  <Text  style={styles.name}>{item.name}</Text>
+                </View>
+              </View>
+            </TouchableOpacity>
+            }
             </View>
             )
         }}/>
