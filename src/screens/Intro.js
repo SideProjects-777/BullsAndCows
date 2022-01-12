@@ -7,40 +7,54 @@ import {
   Image,
   SectionList
 } from 'react-native';
-
+import { Icon } from 'react-native-elements';
 export default class Intro extends Component {
+
+
+  generateNumber(complex, length){
+    switch(length){
+      case 4: 
+        var number = Math.random() * (10000 - 1000) + 1000;
+        break;
+      case 5:
+        var number = Math.random() * (100000 - 10000) + 10000;
+        break;
+    }
+    if(complex){
+      this.props.navigation.navigate('Game',  { guess: Math.floor(number), size:length, complexity:true })
+    }
+    else{
+      var str = Math.floor(number).toString();
+      var strArray  = str.split('');
+      const set = new Set(strArray);
+      const hasDuplicates = set.size < strArray.length;
+      if (hasDuplicates){
+        return this.generateNumber(complex,length)
+      }
+      else{
+        this.props.navigation.navigate('Game',  { guess: Math.floor(number), size:length, complexity:false })
+      }
+    }
+  }
 
   constructor(props) {
     super(props);
     this.state = {
       data:[
         {
-          title:"A", 
+          title:"Easy (No repeats)", 
           data:[
-            {key:1, name:'User 1', image:"https://bootdey.com/img/Content/avatar/avatar6.png"},
-            {key:2, name:'User 2', image:"https://bootdey.com/img/Content/avatar/avatar1.png"},
-            {key:3, name:'User 3', image:"https://bootdey.com/img/Content/avatar/avatar7.png"},
+            {key:1, name:'4-Digits', icon:"bed", type:"ionicon", size: 4, complex: false},
+            {key:2, name:'5-Digits', icon:"boat", type:"ionicon", size: 5, complex: false},
           ]
         },
         {
-          title:"B", 
+          title:"Hard (Perhaps repeats)", 
           data:[
-            {key:1, name:'User 1', image:"https://bootdey.com/img/Content/avatar/avatar3.png"},
-            {key:2, name:'User 2', image:"https://bootdey.com/img/Content/avatar/avatar4.png"},
+            {key:1, name:'4-Digits', icon:"star-half", type:"ionicon",  size: 4, complex: true},
+            {key:2, name:'5-Digits', icon:"star", type:"ionicon", size: 5, complex: true},
           ]
-        },
-        {
-          title:"C", 
-          data:[
-            {key:1, name:'User 1', image:"https://bootdey.com/img/Content/avatar/avatar5.png"},
-          ]
-        },
-        {
-          title:"D", 
-          data:[
-            {key:1, name:'User 1', image:"https://bootdey.com/img/Content/avatar/avatar2.png"},
-          ]
-        },
+        }
       ]
     }
   }
@@ -63,14 +77,14 @@ export default class Intro extends Component {
           renderItem={({item}) => {
             return (
             <View style={styles.container}>
-              <TouchableOpacity onPress={() => {}}>
-                <Image style={styles.image} source={{uri: item.image}}/>
-              </TouchableOpacity>
-              <View style={styles.content}>
-                <View style={styles.contentHeader}>
-                  <Text  style={styles.name}>{item.name}</Text>
+              <TouchableOpacity onPress={() => {this.generateNumber(item.complex,item.size)}} style= {styles.touchable}>
+                <Icon reverse name={item.icon} type={item.type}/>              
+                <View style={styles.content}>
+                  <View style={styles.contentHeader}>
+                    <Text  style={styles.name}>{item.name}</Text>
+                  </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             </View>
             )
         }}/>
@@ -83,6 +97,10 @@ const styles = StyleSheet.create({
   root:{
     marginTop:20,
     padding:10,
+  },
+  touchable:{
+    flexDirection:"row",
+    width:"100%",
   },
   titleContainer:{
     shadowColor: '#00000021',
@@ -107,13 +125,14 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start'
   },
   content: {
-    marginLeft: 16,
+    marginLeft: 20,
     flex: 1,
+    marginTop:20,
   },
   contentHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 6
+    textAlign:"center",
   },
   separator: {
     height: 1,
@@ -132,5 +151,6 @@ const styles = StyleSheet.create({
   name:{
     fontSize:16,
     fontWeight:"bold",
+    textAlign:"center",
   },
 });
