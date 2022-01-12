@@ -42,19 +42,26 @@ export default class Intro extends Component {
     this.state = {
       data:[
         {
-          title:"Easy (No repeats)", 
+          title:'Main',
+          data:[
+            {key:1, name:'Not Completed', icon:"play", type:"ionicon", page:"Not Finished"},
+            {key:2, name:'Statistics', icon:"stats-chart", type:"ionicon", page:"Stats"},
+          ]
+        },
+        {
+          title:"New Game - Easy", 
           data:[
             {key:1, name:'4-Digits', icon:"bed", type:"ionicon", size: 4, complex: false},
             {key:2, name:'5-Digits', icon:"boat", type:"ionicon", size: 5, complex: false},
           ]
         },
         {
-          title:"Hard (Perhaps repeats)", 
+          title:"New Game - Hard", 
           data:[
             {key:1, name:'4-Digits', icon:"star-half", type:"ionicon",  size: 4, complex: true},
             {key:2, name:'5-Digits', icon:"star", type:"ionicon", size: 5, complex: true},
           ]
-        }
+        },
       ]
     }
   }
