@@ -3,10 +3,6 @@ import {
   StyleSheet,
   Text,
   View,
-  TouchableOpacity,
-  Image,
-  Alert,
-  ScrollView,
   TextInput,
   FlatList,
   Button,
@@ -14,13 +10,14 @@ import {
   KeyboardAvoidingView
 } from 'react-native';
 const { width, height } = Dimensions.get('window');
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Icon } from 'react-native-elements';
 
 export default class Game extends Component {
 
   constructor(props) {
     super(props);
-    console.log(props.route.params.guess)
+    const key = Math.floor((Math.random() * 99999999999999999) + 1);
     this.state = {
       msg: '',
       analyze:'',
@@ -28,8 +25,11 @@ export default class Game extends Component {
         {id:1, sent: false, msg: 'Welcome to the game', icon:'chatbubble'},
         {id:2, sent: false, msg: 'Please enter the number with the length of = '+props.route.params.size.toString(), icon:'chatbubble'},
         {id:12, sent: true,  msg: 'Lorem ipsum dolor', icon:'person'},
-      ]
-    };
+      ],
+      game:key,
+      round:0,
+    };    
+    this.initData(key);
     this.send = this.send.bind(this);
     this.reply = this.reply.bind(this);
     this.renderItem   = this._renderItem.bind(this);
@@ -43,7 +43,11 @@ export default class Game extends Component {
       msg: this.state.analyze,
       icon:'chatbubble'
     });
+    var round = this.state.round;
+    this.setState({round:round});
+    this.updateMessages(this.state.game,messages);
     this.setState({msg:'', messages:messages,analyze:''});
+    
   }
 
   send() {
@@ -56,20 +60,73 @@ export default class Game extends Component {
         icon:'person'
       });
       this.setState({messages:messages});
-      this.analyze();
-      
+      this.analyze();     
     }
   }
+
+  initData = async (key) => {    
+    try {
+      const guess = this.props.route.params.guess;      
+      const completed = false;
+      const messages = [];
+      var value = {
+        completed: completed,
+        messages: messages,
+        requiredValue:guess,
+        round:0,
+      }
+      const jsonValue = JSON.stringify(value)
+      console.warn("completed");
+      await AsyncStorage.setItem(key, jsonValue)
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+
+  updateMessages = async (key, messages) =>{
+    try{
+      var jsonValue = await AsyncStorage.getItem(key)
+      jsonValue != null ? JSON.parse(jsonValue) : null;
+      if (jsonValue == null){
+        console.warn("Error at updating the message");
+        return;
+      }
+      jsonValue = JSON.parse(jsonValue)
+      jsonValue.round = jsonValue.round + 1;
+      jsonValue.messages = messages;
+      await AsyncStorage.setItem(key, JSON.stringify(jsonValue))
+      console.warn(jsonValue);
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+
+  updateStatus = async (key, messages) =>{
+    try{
+      var jsonValue = await AsyncStorage.getItem(key)
+      jsonValue != null ? JSON.parse(jsonValue) : null;
+      if (jsonValue == null){
+        console.warn("Error at updating the message");
+        return;
+      }
+      jsonValue = JSON.parse(jsonValue)
+      jsonValue.completed = true;
+      jsonValue.messages = {};
+      await AsyncStorage.setItem(key, JSON.stringify(jsonValue))
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+
 
   analyze(){
     var answer = this.props.route.params.guess.toString();
     var guessedVal = this.state.msg.toString();
-
-
     if(answer == guessedVal){
-      this.setState({analyze:'Congratulations you have won!'})
+      this.setState({analyze:'Congratulations you have won!'});
       setTimeout(() => {
         this.reply();
+        this.updateStatus();
       }, 100);
       return;
     }

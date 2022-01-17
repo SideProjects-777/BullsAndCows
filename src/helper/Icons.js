@@ -1,0 +1,1 @@
+export const iconSet = ["airplane", "body", "aperture", "clipboard", "crop", "enter", "easel", "desktop", "hammer", "library", "receipt", "thermometer", "tv"];
