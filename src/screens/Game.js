@@ -27,7 +27,8 @@ export default class Game extends Component {
         messages: [],
         game:gameId,
         round:0,
-        guessedValue:null
+        guessedValue:null,
+        disabledInput: true,
       };      
       this.loadData(gameId);
     }
@@ -42,7 +43,8 @@ export default class Game extends Component {
         ],
         game:key,
         round:0,
-        guessedValue: props.route.params.guess
+        guessedValue: props.route.params.guess,
+        disabledInput:true,
       };
       console.warn("guessedValue");
       console.warn(props.route.params.guess)
@@ -157,6 +159,7 @@ export default class Game extends Component {
       setTimeout(() => {
         this.reply();
         this.updateStatus(this.state.game);
+        this.setState({disabledInput:false});
       }, 100);
       return;
     }
@@ -261,6 +264,8 @@ export default class Game extends Component {
                 placeholderTextColor = "#696969"
                 onChangeText={msg => this.setState({ msg })}
                 blurOnSubmit={false}
+                editable={this.state.disabledInput}
+                selectTextOnFocus={this.state.disabledInput}
                 onSubmitEditing={() => this.send()}
                 placeholder="Type a message"
                 returnKeyType="send"/>
