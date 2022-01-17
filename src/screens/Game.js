@@ -18,18 +18,35 @@ export default class Game extends Component {
   constructor(props) {
     super(props);
     const key = Math.floor((Math.random() * 99999999999999999) + 1);
-    this.state = {
-      msg: '',
-      analyze:'',
-      messages: [
-        {id:1, sent: false, msg: 'Welcome to the game', icon:'chatbubble'},
-        {id:2, sent: false, msg: 'Please enter the number with the length of = '+props.route.params.size.toString(), icon:'chatbubble'},
-        {id:12, sent: true,  msg: 'Lorem ipsum dolor', icon:'person'},
-      ],
-      game:key,
-      round:0,
-    };    
-    this.initData(key);
+    const loadedGame = props.route.params.isLoaded;
+    console.warn(loadedGame);
+    if (loadedGame){
+      const gameId = props.route.params.key;
+      this.state = {
+        msg: '',
+        analyze:'',
+        messages: [],
+        game:gameId,
+        round:0,
+        guessedValue:null
+      };      
+      this.loadData(gameId);
+    }
+    else{
+      this.state = {
+        msg: '',
+        analyze:'',
+        messages: [
+          {id:1, sent: false, msg: 'Welcome to the game', icon:'chatbubble'},
+          {id:222, sent: false, msg: 'Please enter the number with the length of = '+props.route.params.size.toString(), icon:'chatbubble'},
+          {id:12, sent: true,  msg: 'Lorem ipsum dolor', icon:'person'},
+        ],
+        game:key,
+        round:0,
+        guessedValue: props.route.params.guess
+      };
+      this.initData(key);
+    }    
     this.send = this.send.bind(this);
     this.reply = this.reply.bind(this);
     this.renderItem   = this._renderItem.bind(this);
@@ -46,8 +63,7 @@ export default class Game extends Component {
     var round = this.state.round;
     this.setState({round:round});
     this.updateMessages(this.state.game,messages);
-    this.setState({msg:'', messages:messages,analyze:''});
-    
+    this.setState({msg:'', messages:messages,analyze:''});    
   }
 
   send() {
@@ -62,6 +78,18 @@ export default class Game extends Component {
       this.setState({messages:messages});
       this.analyze();     
     }
+  }
+
+  loadData = async (key) =>{
+    try {
+      const jsonValue = await AsyncStorage.getItem(key);
+      var parsedJsonValue = JSON.parse(jsonValue);
+      this.setState({round:parsedJsonValue.round, messages: parsedJsonValue.messages, guessedValue:parsedJsonValue.guessedValue});
+      console.error(this.state);
+    } catch(e) {
+      console.error(e)
+    }
+    
   }
 
   initData = async (key) => {    
@@ -120,7 +148,7 @@ export default class Game extends Component {
 
 
   analyze(){
-    var answer = this.props.route.params.guess.toString();
+    var answer = this.state.guessedValue.toString();
     var guessedVal = this.state.msg.toString();
     if(answer == guessedVal){
       this.setState({analyze:'Congratulations you have won!'});

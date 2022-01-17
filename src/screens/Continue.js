@@ -5,7 +5,7 @@ import {
   Text,
   View,
   ActivityIndicator,
-  Image,
+  TouchableOpacity,
   FlatList
 } from 'react-native';
 import { Icon } from 'react-native-elements';
@@ -44,7 +44,7 @@ export default class Continue extends Component {
 
   constructor(props) {
     super(props);    
-    this.state = { data:tmpData,  dat:tmpData, isLoading: true }
+    this.state = { data:tmpData, isLoading: true }
     this.getAllKeys();
   }
 
@@ -58,7 +58,8 @@ export default class Continue extends Component {
       for (var i = 0; i < keys.length; i++) {
         var jsonValue = await AsyncStorage.getItem(keys[i]);
         var parsedJson = JSON.parse(jsonValue);
-        parsedJson.id = i;        
+        parsedJson.id = i;
+        parsedJson.gameKey = keys[i]; 
         if(!parsedJson.completed){
           data.push(parsedJson);
         }
@@ -70,10 +71,14 @@ export default class Continue extends Component {
     console.warn(this.state);
   }
 
+  loadGame = (key) => {
+    console.warn(key);
+    this.props.navigation.navigate('Game',  { isLoaded:true, key:key });
+  };
+
 
   render() {
     return (
-      <View>
       <FlatList
         style={styles.root}
         data={this.state.data}
@@ -93,7 +98,7 @@ export default class Continue extends Component {
             mainContentStyle = styles.mainContent;
           }
           return(
-            <View style={styles.container}>
+            <TouchableOpacity style={styles.container} onPress={() => this.loadGame(Group.gameKey)} >
               <Icon reverse name={iconSet[Math.floor(Math.random() * (size - 1))]} type="ionicon"/>
               <View style={styles.content}>
                 <View style={mainContentStyle}>
@@ -105,11 +110,9 @@ export default class Continue extends Component {
                   </Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           );
         }}/>
-        <ActivityIndicator size="large" animating={this.state.isLoading} />
-        </View>
     );
   }
 }
@@ -133,7 +136,7 @@ const styles = StyleSheet.create({
   text: {
     marginBottom: 5,
     flexDirection: 'row',
-    flexWrap:'wrap'
+    flexWrap:'wrap',
   },
   content: {
     flex: 1,
@@ -141,7 +144,8 @@ const styles = StyleSheet.create({
     marginRight: 0
   },
   mainContent: {
-    marginRight: 60
+    marginRight: 60,
+    backgroundColor:'yellow'
   },
   memberImage: {
     height: 30,
