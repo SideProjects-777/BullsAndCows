@@ -19,7 +19,6 @@ export default class Game extends Component {
     super(props);
     const key = Math.floor((Math.random() * 99999999999999999) + 1);
     const loadedGame = props.route.params.isLoaded;
-    console.warn(loadedGame);
     if (loadedGame){
       const gameId = props.route.params.key;
       this.state = {
@@ -45,6 +44,8 @@ export default class Game extends Component {
         round:0,
         guessedValue: props.route.params.guess
       };
+      console.warn("guessedValue");
+      console.warn(props.route.params.guess)
       this.initData(key);
     }    
     this.send = this.send.bind(this);
@@ -84,7 +85,7 @@ export default class Game extends Component {
     try {
       const jsonValue = await AsyncStorage.getItem(key);
       var parsedJsonValue = JSON.parse(jsonValue);
-      this.setState({round:parsedJsonValue.round, messages: parsedJsonValue.messages, guessedValue:parsedJsonValue.guessedValue});
+      this.setState({round:parsedJsonValue.round, messages: parsedJsonValue.messages, guessedValue:parsedJsonValue.requiredValue});
       console.error(this.state);
     } catch(e) {
       console.error(e)
@@ -94,17 +95,18 @@ export default class Game extends Component {
 
   initData = async (key) => {    
     try {
+      console.warn(this.props.route.params.guess)
       const guess = this.props.route.params.guess;      
       const completed = false;
-      const messages = [];
       var value = {
         completed: completed,
-        messages: messages,
+        messages: this.state.messages,
         requiredValue:guess,
         round:0,
       }
       const jsonValue = JSON.stringify(value)
       console.warn("completed");
+      console.warn(jsonValue);
       await AsyncStorage.setItem(key, jsonValue)
     } catch (e) {
       console.warn(e);
@@ -114,7 +116,6 @@ export default class Game extends Component {
   updateMessages = async (key, messages) =>{
     try{
       var jsonValue = await AsyncStorage.getItem(key)
-      jsonValue != null ? JSON.parse(jsonValue) : null;
       if (jsonValue == null){
         console.warn("Error at updating the message");
         return;
@@ -129,7 +130,7 @@ export default class Game extends Component {
     }
   }
 
-  updateStatus = async (key, messages) =>{
+  updateStatus = async (key) =>{
     try{
       var jsonValue = await AsyncStorage.getItem(key)
       jsonValue != null ? JSON.parse(jsonValue) : null;
@@ -141,6 +142,7 @@ export default class Game extends Component {
       jsonValue.completed = true;
       jsonValue.messages = {};
       await AsyncStorage.setItem(key, JSON.stringify(jsonValue))
+      console.warn(jsonValue);
     } catch (e) {
       console.warn(e);
     }
@@ -154,7 +156,7 @@ export default class Game extends Component {
       this.setState({analyze:'Congratulations you have won!'});
       setTimeout(() => {
         this.reply();
-        this.updateStatus();
+        this.updateStatus(this.state.game);
       }, 100);
       return;
     }
@@ -175,7 +177,7 @@ export default class Game extends Component {
   }
 
   genOxen(){
-    var answer = this.props.route.params.guess.toString();
+    var answer =  this.state.guessedValue.toString();
     var guessedVal = this.state.msg.toString();
     var oxen = 0;
     for (let i = 0; i < answer.length; i++) {
@@ -187,7 +189,7 @@ export default class Game extends Component {
   }
 
   genCows(){
-    var answer = this.props.route.params.guess.toString();
+    var answer = this.state.guessedValue.toString();
     var guessedVal = this.state.msg.toString();
     var cows = 0;
     for (let i = 0; i < answer.length; i++) {

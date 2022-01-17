@@ -13,7 +13,7 @@ export default function MyStack() {
     <NavigationContainer>
       <Stack.Navigator  initialRouteName="Intro">
           <Stack.Screen name="Intro" component={Intro}  options={{ headerShown: false }} />  
-          <Stack.Screen name="Game" component={Game}  options={{ headerShown: false }} initialParams={{ guess: null }} />      
+          <Stack.Screen name="Game" component={Game}  initialParams={{ guess: null }} />      
           <Stack.Screen name="Statistics" component={Statistics}  options={{ title: 'Old Games'}} />      
           <Stack.Screen name="Continue" component={Continue}   options={{ title: 'Proceed'}} />      
       </Stack.Navigator>

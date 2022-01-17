@@ -5,6 +5,7 @@ import {
   Text,
   View,
   ActivityIndicator,
+  Button,
   TouchableOpacity,
   FlatList
 } from 'react-native';
@@ -59,7 +60,8 @@ export default class Continue extends Component {
         var jsonValue = await AsyncStorage.getItem(keys[i]);
         var parsedJson = JSON.parse(jsonValue);
         parsedJson.id = i;
-        parsedJson.gameKey = keys[i]; 
+        parsedJson.gameKey = keys[i];
+        console.warn(parsedJson.completed)
         if(!parsedJson.completed){
           data.push(parsedJson);
         }
@@ -76,9 +78,29 @@ export default class Continue extends Component {
     this.props.navigation.navigate('Game',  { isLoaded:true, key:key });
   };
 
+    cleanStorage = async () =>{
+      //await AsyncStorage.clear();
+      this.setState({isLoading:true});
+      var data = this.state.data;
+      for (var i = 0; i < data.length; i++) {
+        var key = data[i].gameKey
+        await AsyncStorage.removeItem(key)
+      //this.setState({isLoading:false});
+
+    }
+    this.setState({data:[]});
+    this.setState({isLoading:false});
+  }
+
 
   render() {
     return (
+      <View  style={styles.mainContainer}>
+        <Button
+        title="Clean not completed"
+        color="grey"
+        onPress={() =>this.cleanStorage()}
+        />      
       <FlatList
         style={styles.root}
         data={this.state.data}
@@ -98,7 +120,7 @@ export default class Continue extends Component {
             mainContentStyle = styles.mainContent;
           }
           return(
-            <TouchableOpacity style={styles.container} onPress={() => this.loadGame(Group.gameKey)} >
+            <TouchableOpacity  style={styles.container} onPress={() => this.loadGame(Group.gameKey)} >
               <Icon reverse name={iconSet[Math.floor(Math.random() * (size - 1))]} type="ionicon"/>
               <View style={styles.content}>
                 <View style={mainContentStyle}>
@@ -113,11 +135,21 @@ export default class Continue extends Component {
             </TouchableOpacity>
           );
         }}/>
+        {this.state.isLoading &&
+          <View style={styles.loading}>
+              <ActivityIndicator size="large" color="grey"/>
+          </View>
+        }
+        </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  mainContainer:{
+    flex:1,
+    flexDirection:'column'
+  },
   root: {
     backgroundColor: "#FFFFFF"
   },
@@ -164,4 +196,15 @@ const styles = StyleSheet.create({
     fontSize:23,
     color:"#1E90FF"
   },
+  loading:{
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    opacity: 0.5,
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignItems: "center"
+  }
 });  
