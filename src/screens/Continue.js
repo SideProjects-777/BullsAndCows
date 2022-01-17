@@ -4,11 +4,12 @@ import {
   StyleSheet,
   Text,
   View,
-  TouchableOpacity,
+  ActivityIndicator,
   Image,
   FlatList
 } from 'react-native';
 import { Icon } from 'react-native-elements';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const size = iconSet.length;
 const tmpData = [
@@ -43,12 +44,36 @@ export default class Continue extends Component {
 
   constructor(props) {
     super(props);    
-    this.state = { data:tmpData }
+    this.state = { data:tmpData,  dat:tmpData, isLoading: true }
+    this.getAllKeys();
+  }
+
+  
+  getAllKeys = async () => {
+    let keys = [];
+    var data = [];
+    try {
+      keys = await AsyncStorage.getAllKeys();
+      console.error(keys.length);
+      for (var i = 0; i < keys.length; i++) {
+        var jsonValue = await AsyncStorage.getItem(keys[i]);
+        var parsedJson = JSON.parse(jsonValue);
+        parsedJson.id = i;        
+        if(!parsedJson.completed){
+          data.push(parsedJson);
+        }
+    }
+    } catch(e) {
+      console.warn(e);
+    }
+    this.setState({data:data, isLoading:false});
+    console.warn(this.state);
   }
 
 
   render() {
     return (
+      <View>
       <FlatList
         style={styles.root}
         data={this.state.data}
@@ -69,20 +94,22 @@ export default class Continue extends Component {
           }
           return(
             <View style={styles.container}>
-              <Icon reverse name={Group.icon} type="ionicon"/>
+              <Icon reverse name={iconSet[Math.floor(Math.random() * (size - 1))]} type="ionicon"/>
               <View style={styles.content}>
                 <View style={mainContentStyle}>
                   <View style={styles.text}>
-                    <Text style={styles.groupName}>{Group.name}</Text>
+                    <Text style={styles.groupName}>Game № {Group.id}</Text>
                   </View>
                   <Text style={styles.countRounds}>
-                    {Group.countMembers} rounds
+                    Round: {Group.round}
                   </Text>
                 </View>
               </View>
             </View>
           );
         }}/>
+        <ActivityIndicator size="large" animating={this.state.isLoading} />
+        </View>
     );
   }
 }
