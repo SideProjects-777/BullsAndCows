@@ -6,6 +6,7 @@ import {
   TextInput,
   FlatList,
   Button,
+  ScrollView,
   Dimensions,
   KeyboardAvoidingView
 } from 'react-native';
@@ -248,7 +249,8 @@ export default class Game extends Component {
 
   render() {
     return (
-      <View style={{ flex: 1 }}>
+      <ScrollView style={{ flex: 1 }} ref={ref => {this.scrollView = ref}}
+      onContentSizeChange={() => this.scrollView.scrollToEnd({animated: true})}>
             <FlatList 
               style={styles.list}
               extraData={this.state}
@@ -263,7 +265,7 @@ export default class Game extends Component {
                 value={this.state.msg}
                 placeholderTextColor = "#696969"
                 onChangeText={msg => this.setState({ msg })}
-                blurOnSubmit={false}
+                
                 editable={this.state.disabledInput}
                 selectTextOnFocus={this.state.disabledInput}
                 onSubmitEditing={() => this.send()}
@@ -271,7 +273,7 @@ export default class Game extends Component {
                 returnKeyType="send"/>
             </View>
           
-      </View>
+      </ScrollView>
     );
   }
 }
