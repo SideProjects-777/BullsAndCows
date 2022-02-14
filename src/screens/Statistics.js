@@ -61,20 +61,17 @@ export default class Statistics extends Component {
         var parsedJson = JSON.parse(jsonValue);
         parsedJson.id = i;
         parsedJson.gameKey = keys[i];
-        console.warn(parsedJson.completed)
         if(parsedJson.completed){
           data.push(parsedJson);
         }
     }
     } catch(e) {
-      console.warn(e);
+      console.error(e);
     }
     this.setState({data:data, isLoading:false});
-    console.warn(this.state);
   }
 
   loadGame = (key) => {
-    console.warn(key);
     this.props.navigation.navigate('Game',  { isLoaded:true, key:key });
   };
 

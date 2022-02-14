@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, useRef } from 'react';
 import {
   StyleSheet,
   Text,
@@ -15,11 +15,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Icon } from 'react-native-elements';
 
 export default class Game extends Component {
-
+  
   constructor(props) {
     super(props);
-    const key = Math.floor((Math.random() * 99999999999999999) + 1);
+    const key = Math.floor((Math.random() * 99999999999999999) + 1).toString();
     const loadedGame = props.route.params.isLoaded;
+    this.flatList = React.createRef();
     if (loadedGame){
       const gameId = props.route.params.key;
       this.state = {
@@ -47,15 +48,12 @@ export default class Game extends Component {
         guessedValue: props.route.params.guess,
         disabledInput:true,
       };
-      console.warn("guessedValue");
-      console.warn(props.route.params.guess)
       this.initData(key);
     }    
     this.send = this.send.bind(this);
     this.reply = this.reply.bind(this);
     this.renderItem   = this._renderItem.bind(this);
   }
-
   reply() {
     var messages = this.state.messages;
     messages.push({
@@ -80,7 +78,7 @@ export default class Game extends Component {
         icon:'person'
       });
       this.setState({messages:messages});
-      this.analyze();     
+      this.analyze(); 
     }
   }
 
@@ -89,7 +87,6 @@ export default class Game extends Component {
       const jsonValue = await AsyncStorage.getItem(key);
       var parsedJsonValue = JSON.parse(jsonValue);
       this.setState({round:parsedJsonValue.round, messages: parsedJsonValue.messages, guessedValue:parsedJsonValue.requiredValue});
-      console.error(this.state);
     } catch(e) {
       console.error(e)
     }
@@ -98,7 +95,6 @@ export default class Game extends Component {
 
   initData = async (key) => {    
     try {
-      console.warn(this.props.route.params.guess)
       const guess = this.props.route.params.guess;      
       const completed = false;
       var value = {
@@ -108,28 +104,25 @@ export default class Game extends Component {
         round:0,
       }
       const jsonValue = JSON.stringify(value)
-      console.warn("completed");
-      console.warn(jsonValue);
-      await AsyncStorage.setItem(key, jsonValue)
+      await AsyncStorage.setItem(key.toString(), jsonValue)
     } catch (e) {
-      console.warn(e);
+      console.error(e);
     }
   }
 
   updateMessages = async (key, messages) =>{
     try{
-      var jsonValue = await AsyncStorage.getItem(key)
+      var jsonValue = await AsyncStorage.getItem(key.toString())
       if (jsonValue == null){
-        console.warn("Error at updating the message");
+        console.error("Error at updating the message");
         return;
       }
       jsonValue = JSON.parse(jsonValue)
       jsonValue.round = jsonValue.round + 1;
       jsonValue.messages = messages;
-      await AsyncStorage.setItem(key, JSON.stringify(jsonValue))
-      console.warn(jsonValue);
+      await AsyncStorage.setItem(key.toString(), JSON.stringify(jsonValue))
     } catch (e) {
-      console.warn(e);
+      console.error(e);
     }
   }
 
@@ -138,16 +131,15 @@ export default class Game extends Component {
       var jsonValue = await AsyncStorage.getItem(key)
       jsonValue != null ? JSON.parse(jsonValue) : null;
       if (jsonValue == null){
-        console.warn("Error at updating the message");
+        console.error("Error at updating the message");
         return;
       }
       jsonValue = JSON.parse(jsonValue)
       jsonValue.completed = true;
       jsonValue.messages = {};
       await AsyncStorage.setItem(key, JSON.stringify(jsonValue))
-      console.warn(jsonValue);
     } catch (e) {
-      console.warn(e);
+      console.error(e);
     }
   }
 
@@ -249,9 +241,10 @@ export default class Game extends Component {
 
   render() {
     return (
-      <ScrollView style={{ flex: 1 }} ref={ref => {this.scrollView = ref}}
-      onContentSizeChange={() => this.scrollView.scrollToEnd({animated: true})}>
-            <FlatList 
+      <View style={styles.mainScreen} >
+            <FlatList          
+            ref= {this.flatList}
+            onContentSizeChange= {()=> this.flatList.current.scrollToEnd({animated:false})} 
               style={styles.list}
               extraData={this.state}
               data={this.state.messages}
@@ -265,47 +258,31 @@ export default class Game extends Component {
                 value={this.state.msg}
                 placeholderTextColor = "#696969"
                 onChangeText={msg => this.setState({ msg })}
-                
+                keyboardType="numeric"
                 editable={this.state.disabledInput}
                 selectTextOnFocus={this.state.disabledInput}
                 onSubmitEditing={() => this.send()}
                 placeholder="Type a message"
                 returnKeyType="send"/>
             </View>
-          
-      </ScrollView>
+      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
+  mainScreen:{
+    flex: 1,
+  },
   keyboard: {
     flex: 1,
     justifyContent: 'center',
   },
-  image: {
-    width,
-    height,
-  },
-  header: {
-    height: 65,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#075e54',
-  },
-  left: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  list: {
+    backgroundColor:"red"
   },
   right: {
     flexDirection: 'row',
-  },
-  chatTitle: {
-    color: '#fff',
-    fontWeight: '600',
-    margin: 10,
-    fontSize: 15,
   },
   chatImage: {
     width: 30,
@@ -340,13 +317,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     margin: 5,
     alignSelf: 'flex-end',
-  },
-  userPic: {
-    height: 40,
-    width: 40,
-    margin: 5,
-    borderRadius: 20,
-    backgroundColor: '#f8f8f8',
   },
   msgBlock: {
     width: 220,
